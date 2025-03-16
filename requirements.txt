@@ -1,0 +1,12 @@
+pandas==1.4.0
+python-dotenv==0.21.0
+SQLAlchemy==1.4.41
+psycopg2-binary==2.9.3
+openpyxl==3.0.10
+opencv-python==4.11.0.86
+numpy==1.23.5
+ultralytics==8.3.38
+pytesseract==0.3.13
+paddlepaddle>=2.0.1
+paddleocr>=2.0.1
+luigi==3.0.3
