@@ -1,6 +1,7 @@
 import cv2
 import urllib.parse
 from dotenv import dotenv_values
+from datetime import datetime
 
 CONFIG = dotenv_values(".env")
 
@@ -34,6 +35,12 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
+    if cv2.waitKey(1) & 0xFF == ord("s"):
+        # get date and time for the image
+        now = datetime.now()
+        dt_string = now.strftime("%d%m%Y%H%M%S")
+        # write the frame to input/images folder
+        cv2.imwrite(f"../input/images/frame_{dt_string}.jpg", frame)
 
 cap.release()
 cv2.destroyAllWindows()
