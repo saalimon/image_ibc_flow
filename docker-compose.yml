@@ -33,6 +33,21 @@ services:
       - ${POSTGRES_PORT}:5432
     volumes:
       - db_volume:/var/lib/postgresql/data
+  streamlit:
+    image: python:3.8-slim
+    container_name: streamlit_app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - 8501:8501
+    command: >
+      sh -c "pip install -r requirements.txt &&
+             streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
+    depends_on:
+      - jupyter_notebook
+    networks:
+      - etl_network
       
 volumes:
   db_volume:

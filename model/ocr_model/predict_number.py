@@ -43,7 +43,7 @@ if __name__ == "__main__":
     pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
     # Path to the folder containing the images
-    folder_path = "../../input/crop/ibc_number/"
+    folder_path = "/home/jovyan/work/input/crop/ibc_number/"
 
     # List to store results
     results = []
