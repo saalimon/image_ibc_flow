@@ -4,9 +4,9 @@ from dotenv import dotenv_values
 
 CONFIG = dotenv_values(".env")
 
-username = CONFIG["CAMERA_USERNAME"]
+username = CONFIG["CAMERA_USER"]
 password = CONFIG["CAMERA_PASSWORD"]
-ip_address = CONFIG["CAMERA_IP_ADDRESS"]
+ip_address = CONFIG["CAMERA_IP"]
 port = CONFIG["CAMERA_PORT"]
 stream_path = "/Streaming/channels/2/"
 
