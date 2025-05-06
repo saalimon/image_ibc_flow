@@ -36,15 +36,15 @@ services:
     volumes:
       - db_volume:/var/lib/postgresql/data
 
-  streamlit:
+  gradio:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: streamlit_app
+    container_name: gradio_app
     volumes:
       - ./:/app
     ports:
-      - 8501:8501
+      - 7860:7860
     depends_on:
       - jupyter_notebook
     networks:

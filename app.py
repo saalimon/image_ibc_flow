@@ -1,39 +1,51 @@
-import streamlit as st
+import gradio as gr
 import subprocess
+import os
 
-# Title
-st.title("OCR Model Interface")
+def run_prediction(image):
+    if image is not None:
+        # Save the uploaded image
+        image_path = "temp_image.png"
+        image.save(image_path)
 
-# Sidebar for navigation
-st.sidebar.title("Navigation")
-option = st.sidebar.selectbox("Choose an action", ["Run Prediction", "Train Model", "Get Numbers"])
+        # Run the prediction script
+        result = subprocess.run(["python", "model/ocr_model/predict_number.py"], capture_output=True, text=True)
+        return f"Prediction Output:\n{result.stdout}"
+    return "No image uploaded."
 
-# Run Prediction
-if option == "Run Prediction":
-    st.header("Run Prediction")
-    input_image = st.file_uploader("Upload an image for prediction", type=["png", "jpg", "jpeg"])
-    if input_image is not None:
-        with open("temp_image.png", "wb") as f:
-            f.write(input_image.getbuffer())
-        st.write("Image uploaded successfully.")
-        if st.button("Run Prediction"):
-            result = subprocess.run(["python", "model/ocr_mode/predict_number.py"], capture_output=True, text=True)
-            st.text("Prediction Output:")
-            st.text(result.stdout)
+def train_model():
+    # Run the training script
+    result = subprocess.run(["python", "model/ocr_model/train.py"], capture_output=True, text=True)
+    return f"Training Output:\n{result.stdout}"
 
-# Train Model
-elif option == "Train Model":
-    st.header("Train Model")
-    if st.button("Start Training"):
-        with st.spinner("Training in progress..."):
-            result = subprocess.run(["python", "model/ocr_model/train.py"], capture_output=True, text=True)
-            st.text("Training Output:")
-            st.text(result.stdout)
+def get_numbers():
+    # Run the get numbers script
+    result = subprocess.run(["python", "utils/get_numbers.py"], capture_output=True, text=True)
+    return f"Get Numbers Output:\n{result.stdout}"
 
-# Get Numbers
-elif option == "Get Numbers":
-    st.header("Get Numbers")
-    if st.button("Run Get Numbers"):
-        result = subprocess.run(["python", "utils/get_numbers.py"], capture_output=True, text=True)
-        st.text("Get Numbers Output:")
-        st.text(result.stdout)
+# Create the Gradio interface
+with gr.Blocks(title="OCR Model Interface") as demo:
+    gr.Markdown("# OCR Model Interface")
+
+    with gr.Tab("Run Prediction"):
+        with gr.Row():
+            with gr.Column():
+                image_input = gr.Image(type="pil", label="Upload an image for prediction")
+                predict_button = gr.Button("Run Prediction")
+            with gr.Column():
+                output_text = gr.Textbox(label="Output", lines=10)
+        predict_button.click(fn=run_prediction, inputs=image_input, outputs=output_text)
+
+    with gr.Tab("Train Model"):
+        train_button = gr.Button("Start Training")
+        train_output = gr.Textbox(label="Training Output", lines=10)
+        train_button.click(fn=train_model, inputs=None, outputs=train_output)
+
+    with gr.Tab("Get Numbers"):
+        get_numbers_button = gr.Button("Run Get Numbers")
+        get_numbers_output = gr.Textbox(label="Get Numbers Output", lines=10)
+        get_numbers_button.click(fn=get_numbers, inputs=None, outputs=get_numbers_output)
+
+# Launch the app
+if __name__ == "__main__":
+    demo.launch(server_name="0.0.0.0", server_port=7860)
