@@ -5,6 +5,8 @@ import cv2
 from tqdm import tqdm  
 import pytesseract
 import logging
+
+
 def pytesseract_ocr(image_path, pytesseract):
 
     # Read the image using OpenCV
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
     # Path to the folder containing the images
-    folder_path = "/home/jovyan/work/input/crop/ibc_number/"
+    folder_path = "./"
 
     # List to store results
     results = []

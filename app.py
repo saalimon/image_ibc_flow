@@ -26,7 +26,7 @@ elif option == "Train Model":
     st.header("Train Model")
     if st.button("Start Training"):
         with st.spinner("Training in progress..."):
-            result = subprocess.run(["python", "model/ocr_mode/train.py"], capture_output=True, text=True)
+            result = subprocess.run(["python", "model/ocr_model/train.py"], capture_output=True, text=True)
             st.text("Training Output:")
             st.text(result.stdout)
 
