@@ -1,0 +1,17 @@
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      continue-on-error: false
+    - name: Build Docker compose
+      uses: adambirds/docker-compose-action@v1.5.0
+      with:
+        compose-file: "../../docker-compose.yml"
