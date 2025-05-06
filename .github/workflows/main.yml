@@ -14,4 +14,4 @@ jobs:
     - name: Build Docker compose
       uses: adambirds/docker-compose-action@v1.5.0
       with:
-        compose-file: "../../docker-compose.yml"
+        compose-file: "./docker-compose.yml"
