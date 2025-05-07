@@ -20,6 +20,7 @@ def pytesseract_ocr(image_path, pytesseract):
     predicted_text = pytesseract.image_to_string(image_rgb, config=config)
 
     return predicted_text.strip()  # Remove any trailing spaces
+
 def paddleocr_ocr(image_path, ocr):
     # Perform OCR on the image
     result = ocr.ocr(image_path)
@@ -36,7 +37,23 @@ def paddleocr_ocr(image_path, ocr):
         predicted_text = ""
     return predicted_text.strip()  # Remove any trailing spaces
 
-if __name__ == "__main__":
+def process_single_image(image_path):
+    logging.getLogger('ppocr').setLevel(logging.WARNING)
+
+    ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+    pytesseract_pt = pytesseract_ocr(image_path, pytesseract=pytesseract)
+    paddle_pt = paddleocr_ocr(image_path, ocr=ocr)
+
+    return {
+        'pytesseract_predicted_result': pytesseract_pt.strip(),
+        'paddleocr_ocr_predicted_result': paddle_pt.strip()
+    }
+
+def main():
+    """
+    Main function to process all images in a directory and save results to CSV.
+    """
     # Suppress PaddleOCR debug info
     logging.getLogger('ppocr').setLevel(logging.WARNING)
     # Initialize PaddleOCR
@@ -55,11 +72,11 @@ if __name__ == "__main__":
     # Loop through all image files with a progress bar
     for filename in tqdm(image_files, desc="Processing Images"):
         file_path = os.path.join(folder_path, filename)
-        
+
         # Check if the file is an image 
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg')): 
             pytesseract_pt = pytesseract_ocr(file_path, pytesseract=pytesseract)
-            paddle_pt = paddleocr_ocr(file_path,ocr=ocr)
+            paddle_pt = paddleocr_ocr(file_path, ocr=ocr)
 
             # Add the filename and predicted text to the results list
             results.append({
@@ -77,3 +94,6 @@ if __name__ == "__main__":
     # Optionally, save the DataFrame to a CSV file
     df.to_csv('ocr_results_tesseract.csv', index=False)
     print("Results saved to 'ocr_results_tesseract.csv'")
+
+if __name__ == "__main__":
+    main()

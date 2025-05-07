@@ -1,6 +1,7 @@
 import gradio as gr
 import subprocess
 import os
+from model.ocr_model.predict_number import process_single_image
 
 def run_prediction(image):
     if image is not None:
@@ -8,9 +9,15 @@ def run_prediction(image):
         image_path = "temp_image.png"
         image.save(image_path)
 
-        # Run the prediction script
-        result = subprocess.run(["python", "model/ocr_model/predict_number.py"], capture_output=True, text=True)
-        return f"Prediction Output:\n{result.stdout}"
+        # Process the image using the imported function
+        results = process_single_image(image_path)
+
+        # Format the results
+        output = "Prediction Output:\n"
+        output += f"Pytesseract Result: {results['pytesseract_predicted_result']}\n"
+        output += f"PaddleOCR Result: {results['paddleocr_ocr_predicted_result']}"
+
+        return output
     return "No image uploaded."
 
 def train_model():
