@@ -24,3 +24,4 @@ pytesseract==0.3.13
 paddlepaddle>=2.0.1
 paddleocr>=2.0.1
 gradio
+easyocr>=1.7.0
