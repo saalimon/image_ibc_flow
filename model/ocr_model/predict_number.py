@@ -1,27 +1,29 @@
+
 import os
 import logging
 from typing import Dict, List
-import easyocr
-import pandas as pd
 from paddleocr import PaddleOCR
 import cv2
 from tqdm import tqdm
 import pytesseract
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+from PIL import Image
+import pandas as pd
 
 # Configuration constants
 TESSERACT_PATH = '/usr/bin/tesseract'
 SUPPORTED_IMAGE_FORMATS = ('.png', '.jpg', '.jpeg')
 TESSERACT_CONFIG = '--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
-OUTPUT_CSV_FILE = 'ocr_results_tesseract.csv'
-ALLOWED_DIGITS = '0123456789'
+OUTPUT_CSV_FILE = 'ocr_results.csv'
 
 
 class OCREngine:
     def __init__(self):
         self._setup_logging()
         self.paddle_ocr = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
-        self.easy_reader = easyocr.Reader(['en'])
         pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
+        self.trocr_processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed")
+        self.trocr_model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed")
 
     def _setup_logging(self) -> None:
         logging.getLogger('ppocr').setLevel(logging.WARNING)
@@ -34,10 +36,11 @@ class OCREngine:
 
     def process_with_tesseract(self, image_path: str) -> str:
         image_rgb = self._preprocess_image(image_path)
-        return pytesseract.image_to_string(
+        text = pytesseract.image_to_string(
             image_rgb,
             config=TESSERACT_CONFIG
         ).strip()
+        return ''.join(char for char in text if char.isdigit())
 
     def process_with_paddle(self, image_path: str) -> str:
         result = self.paddle_ocr.ocr(image_path, det=True, rec=True, cls=True)
@@ -49,17 +52,20 @@ class OCREngine:
             if line and isinstance(line, list) and len(line) > 1:
                 text = str(line[1][0])
                 predicted_text += ''.join(char for char in text if char.isdigit())
-        return predicted_text.strip()
+        return predicted_text
 
-    def process_with_easyocr(self, image_path: str) -> str:
-        text_results = self.easy_reader.readtext(image_path, allowlist=ALLOWED_DIGITS)
-        return ''.join(text[1] for text in text_results).strip()
+    def process_with_trocr(self, image_path: str) -> str:
+        image = Image.open(image_path).convert("RGB")
+        pixel_values = self.trocr_processor(image, return_tensors="pt").pixel_values
+        generated_ids = self.trocr_model.generate(pixel_values)
+        text = self.trocr_processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        return ''.join(char for char in text if char.isdigit())
 
     def process_single_image(self, image_path: str) -> Dict[str, str]:
         return {
             'pytesseract_predicted_result': self.process_with_tesseract(image_path),
             'paddleocr_ocr_predicted_result': self.process_with_paddle(image_path),
-            'easyocr_predicted_result': self.process_with_easyocr(image_path)
+            'trocr_predicted_result': self.process_with_trocr(image_path)
         }
 
     def process_directory(self, folder_path: str) -> List[Dict[str, str]]:

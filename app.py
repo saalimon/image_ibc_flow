@@ -15,7 +15,7 @@ def run_prediction(image):
         output = "Prediction Output:\n"
         output += f"Pytesseract Result: {results['pytesseract_predicted_result']}\n"
         output += f"PaddleOCR Result: {results['paddleocr_ocr_predicted_result']}\n"
-        output += f"EasyOCR Result: {results['easyocr_predicted_result']}"
+        output += f"TrOCR Result: {results['trocr_predicted_result']}"
 
         return output
     return "No image uploaded."
