@@ -15,6 +15,7 @@ running = True
 
 TEST_URL = "rtsp://host.docker.internal:8554/local-loop"
 
+ocr_engine = OCREngine()
 
 # Initialize the GetImages class
 def run_cropping():
@@ -29,7 +30,7 @@ def run_prediction_dir(
         progress(0, desc="Processing Directory")
         OUTPUT_CSV_FILE = "ocr_results.csv"
         # Process the directory using the imported function
-        results = OCREngine().process_directory(folder_path, tqdm_obj=progress.tqdm)
+        results = ocr_engine.process_directory(folder_path, tqdm_obj=progress.tqdm)
 
         # Format the results
         output = "Prediction Output:\n"
@@ -42,9 +43,6 @@ def run_prediction_dir(
             output += f"Length: {df.shape}\n"
         return output
     return "No directory uploaded."
-
-
-ocr_engine = OCREngine()
 
 def run_prediction(image):
     if image is not None:
