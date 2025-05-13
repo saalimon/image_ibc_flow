@@ -11,7 +11,7 @@ services:
       CHOWN_HOME: "yes"
       CHOWN_HOME_OPTS: "-R"
     ports:
-      - 8888:8888
+      - 8889:8889
     volumes:
       - ./:/home/jovyan/work
       - ./configure_environment.sh:/usr/local/bin/before-notebook.d/configure_environment.sh
@@ -45,8 +45,6 @@ services:
       - ./:/app
     ports:
       - 7860:7860
-    depends_on:
-      - jupyter_notebook
     networks:
       - etl_network
 
