@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 # Install OpenGL library
 sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx && apt-get -y install tesseract-ocr

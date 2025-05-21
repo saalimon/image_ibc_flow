@@ -14,7 +14,7 @@ test_images_dir = "/app/input/images"
 output_crops_dir = "/app/input/crop"
 
 
-def cropping():
+def cropping(tqdm_obj=tqdm):
     # Check if the model is loaded
     if MODEL is None:
         print("Model not loaded. Please check the model path and name.")
@@ -35,7 +35,7 @@ def cropping():
     image_files = os.listdir(test_images_dir)
     results = []
     # Use tqdm to display a progress bar
-    for image_file in tqdm(image_files, desc="Processing images", unit="image"):
+    for image_file in tqdm_obj(image_files, desc="Processing images", unit="image"):
         image_path = os.path.join(test_images_dir, image_file)
 
         # Read the image
