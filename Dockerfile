@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements files
 COPY requirements.txt requirements.lock ./
-
 # Install uv and use it for package installation
 RUN pip install uv
 RUN uv pip install --system --no-cache -r requirements.txt
