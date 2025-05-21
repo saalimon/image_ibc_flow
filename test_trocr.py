@@ -2,9 +2,11 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 import requests
 from PIL import Image
 import time
-
+start_time = time.time()
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed")
 model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed")
+elapsed_time = time.time() - start_time
+print(f"Time elapsed for loding : {elapsed_time:.2f} seconds")
 
 # load image from the IAM dataset
 start_time = time.time()

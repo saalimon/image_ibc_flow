@@ -15,10 +15,12 @@ running = True
 
 TEST_URL = "rtsp://host.docker.internal:8554/local-loop"
 
+ocr_engine = OCREngine()
+
 
 # Initialize the GetImages class
-def run_cropping():
-    output = cropping()
+def run_cropping(progress=gr.Progress()):
+    output = cropping(tqdm_obj=progress.tqdm)
     return output
 
 
@@ -29,17 +31,14 @@ def run_prediction_dir(
         progress(0, desc="Processing Directory")
         OUTPUT_CSV_FILE = "ocr_results.csv"
         # Process the directory using the imported function
-        results = OCREngine().process_directory(folder_path, tqdm_obj=progress.tqdm)
+        results = ocr_engine.process_directory(folder_path, tqdm_obj=progress.tqdm)
 
         # Format the results
         output = "Prediction Output:\n"
         df = pd.DataFrame(results)
         df.to_csv(OUTPUT_CSV_FILE, index=False)
-
-        print(f"Results saved to '{OUTPUT_CSV_FILE}'")
-        for result in results:
-            output += f"Path: {OUTPUT_CSV_FILE}\n"
-            output += f"Length: {df.shape}\n"
+        output += f"Path: {OUTPUT_CSV_FILE}\n"
+        output += f"Length: {len(results)}\n"
         return output
     return "No directory uploaded."
 
@@ -51,12 +50,12 @@ def run_prediction(image):
         image.save(image_path)
 
         # Process the image using the imported function
-        results = OCREngine().process_single_image(image_path)
+        results = ocr_engine.process_single_image(image_path)
 
         # Format the results
         output = "Prediction Output:\n"
         output += f"Pytesseract Result: {results['pytesseract_predicted_result']}\n"
-        output += f"PaddleOCR Result: {results['paddleocr_ocr_predicted_result']}\n"
+        output += f"LevOCR Result: {results['levocr_predicted_result']}\n"
         output += f"TrOCR Result: {results['trocr_predicted_result']}"
 
         return output
@@ -75,16 +74,20 @@ def get_rtsp_frame():
     global latest_frame, running
     img_obj = GetImages("/app/.env")
     cap = cv2.VideoCapture(img_obj.url, cv2.CAP_FFMPEG)
+    # cap = cv2.VideoCapture(TEST_URL, cv2.CAP_FFMPEG)
     if not cap.isOpened():
         return None
-    while running:
-        ret, frame = cap.read()
+    try:
+        while running:
+            ret, frame = cap.read()
 
-        if not ret:
-            return None
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        latest_frame = frame
-        yield frame
+            if not ret:
+                return None
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            latest_frame = frame
+            yield frame
+    finally:
+        cap.release()
 
 
 def capture_and_save():
@@ -135,7 +138,7 @@ with gr.Blocks(title="OCR Model Interface") as demo:
                 fn=run_prediction, inputs=[image_input], outputs=output_text
             )
 
-    with gr.Tab("Train Model"):
+    with gr.Tab("Train Model", visible=False):  # Grayout by setting visibility to False
         train_button = gr.Button("Start Training")
         train_output = gr.Textbox(label="Training Output", lines=10)
         train_button.click(fn=train_model, inputs=None, outputs=train_output)
