@@ -24,6 +24,7 @@ class GetImages:
 
     def get_images(self):
         self.cap = cv2.VideoCapture(self.url, cv2.CAP_FFMPEG)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 3) # Set buffer size to 3 frames
         if not self.cap.isOpened():
             print("Failed to open stream")
             exit()

@@ -72,9 +72,13 @@ def train_model():
 
 
 def get_rtsp_frame():
-    global latest_frame, running
+    # global latest_frame, running
     img_obj = GetImages("/app/.env")
+    print(f"Trying to connect to: {img_obj.url}")
+    cv2.setLogLevel(5)
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|timeout;5000000"
     cap = cv2.VideoCapture(img_obj.url, cv2.CAP_FFMPEG)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Set buffer size to 1 frame
     if not cap.isOpened():
         return None
     while running:
@@ -87,16 +91,16 @@ def get_rtsp_frame():
         yield frame
 
 
-def capture_and_save():
-    frame = latest_frame
-    if frame is None:
-        return None, "No frame to capture."
+# def capture_and_save():
+#     frame = latest_frame
+#     if frame is None:
+#         return None, "No frame to capture."
 
-    # Save image to file
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    name = f"captured_frame_{timestamp}.jpg"
-    cv2.imwrite(f"/app/output/{name}", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-    return frame, f"Captured and saved as {name}"
+#     # Save image to file
+#     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+#     name = f"captured_frame_{timestamp}.jpg"
+#     cv2.imwrite(f"/app/output/{name}", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
+#     return frame, f"Captured and saved as {name}"
 
 
 # Create the Gradio interface
