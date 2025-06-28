@@ -71,23 +71,23 @@ def train_model():
 
 
 def get_rtsp_frame():
-    global latest_frame, running
+    # global latest_frame, running
     img_obj = GetImages("/app/.env")
+    print(f"Trying to connect to: {img_obj.url}")
+    cv2.setLogLevel(5)
+    os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|timeout;5000000"
     cap = cv2.VideoCapture(img_obj.url, cv2.CAP_FFMPEG)
-    # cap = cv2.VideoCapture(TEST_URL, cv2.CAP_FFMPEG)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Set buffer size to 1 frame
     if not cap.isOpened():
         return None
-    try:
-        while running:
-            ret, frame = cap.read()
+    while running:
+        ret, frame = cap.read()
 
-            if not ret:
-                return None
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            latest_frame = frame
-            yield frame
-    finally:
-        cap.release()
+        if not ret:
+            return None
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        latest_frame = frame
+        yield frame
 
 
 def capture_and_save():
