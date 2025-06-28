@@ -78,6 +78,8 @@ def get_rtsp_frame():
     os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp|timeout;5000000"
     cap = cv2.VideoCapture(img_obj.url, cv2.CAP_FFMPEG)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Set buffer size to 1 frame
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)  # Set width to high resolution
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)  # Set height to high resolution
     if not cap.isOpened():
         return None
     while running:

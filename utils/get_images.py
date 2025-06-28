@@ -13,7 +13,7 @@ class GetImages:
         password = CONFIG["CAMERA_PASSWORD"]
         ip_address = CONFIG["CAMERA_IP"]
         port = CONFIG["CAMERA_PORT"]
-        stream_path = "/Streaming/channels/2/"
+        stream_path = "/Streaming/channels/1?videoCodecType=H.265"
         # Encode username and password
         encoded_password = urllib.parse.quote(password)
         self.url = (
