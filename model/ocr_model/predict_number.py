@@ -1,3 +1,4 @@
+
 import os
 import logging
 from typing import Dict, List
@@ -8,6 +9,7 @@ import pytesseract
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 from PIL import Image
 import pandas as pd
+from levOCR import LevOCRProcessor
 
 # Configuration constants
 TESSERACT_PATH = "/usr/bin/tesseract"
@@ -21,12 +23,9 @@ class OCREngine:
         self._setup_logging()
         self.paddle_ocr = PaddleOCR(use_angle_cls=True, lang="en", use_gpu=False)
         pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
-        self.trocr_processor = TrOCRProcessor.from_pretrained(
-            "microsoft/trocr-base-printed"
-        )
-        self.trocr_model = VisionEncoderDecoderModel.from_pretrained(
-            "microsoft/trocr-base-printed"
-        )
+        self.trocr_processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-printed")
+        self.trocr_model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-printed")
+        self.levocr_processor = LevOCRProcessor()
 
     def _setup_logging(self) -> None:
         logging.getLogger("ppocr").setLevel(logging.WARNING)
@@ -54,6 +53,10 @@ class OCREngine:
                 predicted_text += "".join(char for char in text if char.isdigit())
         return predicted_text
 
+    def process_with_levocr(self, image_path: str):
+        text = self.levocr_processor.get_result_single_file(image_path)
+        return ''.join(char for char in text if char.isdigit())
+
     def process_with_trocr(self, image_path: str) -> str:
         image = Image.open(image_path).convert("RGB")
         pixel_values = self.trocr_processor(image, return_tensors="pt").pixel_values
@@ -65,9 +68,9 @@ class OCREngine:
 
     def process_single_image(self, image_path: str) -> Dict[str, str]:
         return {
-            "pytesseract_predicted_result": self.process_with_tesseract(image_path),
-            "paddleocr_ocr_predicted_result": self.process_with_paddle(image_path),
-            "trocr_predicted_result": self.process_with_trocr(image_path),
+            'pytesseract_predicted_result': self.process_with_tesseract(image_path),
+            'levocr_predicted_result': self.process_with_levocr(image_path),
+            'trocr_predicted_result': self.process_with_trocr(image_path)
         }
 
     def process_directory(

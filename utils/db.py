@@ -1,4 +1,4 @@
-import logger
+from .logger import logger
 import pandas as pd
 from dotenv import dotenv_values
 from sqlalchemy import create_engine, inspect
